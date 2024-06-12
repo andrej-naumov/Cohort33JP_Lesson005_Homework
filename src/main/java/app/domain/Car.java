@@ -15,11 +15,19 @@ public class Car {
     public Car() {
     }
 
-    // Конструктор с параметрами
+    // Конструктор с параметрами (без id)
     @JsonCreator
     public Car(@JsonProperty("brand") String brand,
                @JsonProperty("price") BigDecimal price,
                @JsonProperty("year") int year) {
+        this.brand = brand;
+        this.price = price;
+        this.year = year;
+    }
+
+    // Конструктор с параметрами (с id)
+    public Car(long id, String brand, BigDecimal price, int year) {
+        this.id = id;
         this.brand = brand;
         this.price = price;
         this.year = year;
