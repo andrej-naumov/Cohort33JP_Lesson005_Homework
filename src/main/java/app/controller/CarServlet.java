@@ -2,6 +2,7 @@ package app.controller;
 
 import app.domain.Car;
 import app.repository.CarRepository;
+import app.repository.CarRepositoryDB;
 import app.repository.CarRepositoryMap;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +18,8 @@ import java.math.BigDecimal;
 
 public class CarServlet extends HttpServlet {
 
-    private CarRepository repository = new CarRepositoryMap();
+    // private CarRepository repository = new CarRepositoryMap();
+    private CarRepository repository = new CarRepositoryDB();
 
     // GET http://10.2.3.4:8080/cars
     // GET http://10.2.3.4:8080/cars?id=5
