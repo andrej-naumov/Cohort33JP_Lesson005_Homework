@@ -46,15 +46,51 @@ public class CarServlet extends HttpServlet {
                 resp.getWriter().write("Invalid id format.");
             }
         } else {
-            // Если параметр id не передан, возвращаем все автомобили
-            List<Car> cars = repository.getAll();
-            cars.forEach(car -> {
-                try {
-                    resp.getWriter().write(car.toString() + "\n");
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+            // Получение параметров из запроса
+            String minPriceParam = req.getParameter("minprice");
+            String maxPriceParam = req.getParameter("maxprice");
+            String brandParam = req.getParameter("brand"); // параметр для фильтрации по марке
+            String orderByParam = req.getParameter("orderby");
+            String orderParam = req.getParameter("order");
+            String limitParam = req.getParameter("limit");
+
+            // Переменные для хранения значений параметров
+            BigDecimal minPrice = null;
+            BigDecimal maxPrice = null;
+            String orderBy = "id"; // По умолчанию сортировка по идентификатору
+            String order = "asc"; // По умолчанию сортировка по возрастанию
+            int limit = 10; // По умолчанию ограничение на 10 записей
+
+            // Попытка преобразования параметров в нужный тип
+            try {
+                if (minPriceParam != null) {
+                    minPrice = new BigDecimal(minPriceParam);
                 }
-            });
+                if (maxPriceParam != null) {
+                    maxPrice = new BigDecimal(maxPriceParam);
+                }
+                if (orderByParam != null) {
+                    orderBy = orderByParam;
+                }
+                if (orderParam != null) {
+                    order = orderParam;
+                }
+                if (limitParam != null) {
+                    limit = Integer.parseInt(limitParam);
+                }
+            } catch (NumberFormatException e) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().write("Invalid parameter format.");
+                return;
+            }
+
+            // Получение списка автомобилей с учетом параметров
+            List<Car> cars = repository.getCarsWithParameters(minPrice, maxPrice, brandParam, orderBy, order, limit);
+
+            // Вывод списка автомобилей в ответе
+            for (Car car : cars) {
+                resp.getWriter().write(car.toString() + "\n");
+            }
         }
     }
 
@@ -93,7 +129,7 @@ public class CarServlet extends HttpServlet {
 
         // Отправка успешного ответа
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.getWriter().write("Car price updated: " + car);
+        resp.getWriter().write("Car price updated to new price: " + newPrice);
     }
 
     @Override

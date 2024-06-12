@@ -34,6 +34,64 @@ public class CarRepositoryDB implements CarRepository {
     }
 
     @Override
+    public List<Car> getCarsWithParameters(BigDecimal minPrice, BigDecimal maxPrice, String brand, String orderBy, String order, int limit) {
+        List<Car> cars = new ArrayList<>();
+        try (Connection connection = getConnection()) {
+            StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM car WHERE 1=1");
+
+            if (minPrice != null) {
+                sqlBuilder.append(" AND price >= ?");
+            }
+            if (maxPrice != null) {
+                sqlBuilder.append(" AND price <= ?");
+            }
+            if (brand != null) {
+                sqlBuilder.append(" AND brand = ?");
+            }
+
+            sqlBuilder.append(" ORDER BY ");
+            if ("price".equals(orderBy)) {
+                sqlBuilder.append("price");
+            }
+            if ("brand".equals(orderBy)) {
+                sqlBuilder.append("brand");
+            } else {
+                sqlBuilder.append("id"); // По умолчанию сортировка по идентификатору
+            }
+            sqlBuilder.append(" ").append(order);
+
+            sqlBuilder.append(" LIMIT ?;");
+            PreparedStatement statement = connection.prepareStatement(sqlBuilder.toString());
+
+            int paramIndex = 1;
+            if (minPrice != null) {
+                statement.setBigDecimal(paramIndex++, minPrice);
+            }
+            if (maxPrice != null) {
+                statement.setBigDecimal(paramIndex++, maxPrice);
+            }
+            if (brand != null) {
+                statement.setString(paramIndex++, brand);
+            }
+            statement.setInt(paramIndex, limit);
+
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Car car = new Car();
+                car.setId(resultSet.getLong("id"));
+                car.setBrand(resultSet.getString("brand"));
+                car.setPrice(resultSet.getBigDecimal("price"));
+                car.setYear(resultSet.getInt("year"));
+                cars.add(car);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return cars;
+    }
+
+
+    @Override
     public Car getById(long id) {
         Car car = null;
         try (Connection connection = getConnection()) {

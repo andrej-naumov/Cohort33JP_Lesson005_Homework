@@ -25,6 +25,13 @@ public class CarRepositoryMap implements CarRepository {
     }
 
     @Override
+    public List<Car> getCarsWithParameters(BigDecimal minPrice, BigDecimal maxPrice, String brand, String orderBy, String order, int limit) {
+        // TODO: implement please
+        return List.of();
+    }
+
+
+    @Override
     public Car save(Car car) {
         car.setId(++currentId);
         database.put(currentId, car);
